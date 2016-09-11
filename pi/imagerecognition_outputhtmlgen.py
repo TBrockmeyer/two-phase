@@ -30,31 +30,39 @@ for i in range(len(fittedparams)):
     <table style="width:100%">
     <tr>
     <td>
-    sample = """+str(i)+"""
+    <center>
+    <h2>sample = """+str(i+1)+"""</h2>
+    </center>
     </td>    
     </tr>
     <tr>
     <td>
+    <center>
+    <img src=sample"""+str(i+1)+"""_s.jpg alt="Outdoor Scene" height="12%" width="12%"> 
     <img src=curve_"""+str(i)+""".png alt="Outdoor Scene" height="50%" width="50%"> 
+    </center>
     </td>    
     </tr>
     <tr>
     <td>
-    height = """+str(np.round(heightmm[i],2))+""" mm
     </td>    
     </tr>
     <tr>
     <td>
+    <center>
+    <h2> status of analysis: 
     """
     if fittedparams[i,1]<0:
-        html_str2 = """ bad 
+        html_str2 = """ not successful - 
                         <img src=pic_redcross.jpeg alt="Outdoor Scene" height="10%" width="10%"> 
                         </tr></td>"""
     else:
-        html_str2 = """ good
-                        <img src=pic_greenarrow.jpeg alt="Outdoor Scene" height="10%" width="10%"> 
+        html_str2 = """ successful - height extracted 
+                        <img src=pic_greenarrow.jpeg alt="Outdoor Scene" height="5%" width="5%"> 
+                        <h2>calculated height: """+str(np.round(heightmm[i],2))+""" mm</h2>
                         </tr></td>"""
     html_str3 ="""
+    </center>
     </table>
     </head><body></body></html>
     """    

@@ -56,6 +56,7 @@ class Pipette():
                 "Pipette {} not calibrated.".format(self.axis)
             )
         percent = self._volume_percentage(volume)
+        print("Pipette plunger pressed at {}%".format(percent))
         travel = self._blowout - self._top
         distance = travel * percent
         return self._top + distance
@@ -104,7 +105,7 @@ class Pipette():
 
     @property
     def blowout(self):
-        return self._blowout
+        return self._blowout + 1
 
     @property
     def droptip(self):

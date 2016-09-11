@@ -1,3 +1,5 @@
+import RPi.GPIO as GPIO
+
 class Scanner():
     def __init__(self, board_pin):
         self.board_pin = board_pin

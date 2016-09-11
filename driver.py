@@ -1,6 +1,8 @@
 import serial
 import time
 
+from decorator import contextmanager
+
 
 class GCodeLogger():
 
@@ -85,6 +87,7 @@ class CNCDriver(object):
         self.simulated = simulate
         self.command_queue = []
 
+    @contextmanager
     def connect(self, device=None, port=None, baudrate=None):
         self.connection = serial.Serial(port=device or port)
         self.connection.close()
@@ -93,6 +96,8 @@ class CNCDriver(object):
         self.connection.open()
         print("Serial", "Connected to {}".format(device or port))
         self.wait_for_stat()
+        yield
+        self.connection.close()
 
     def wait_for_stat(self, stat=None):
         if self.DEBUG_ON:
@@ -119,9 +124,12 @@ class CNCDriver(object):
 
         args = []
         for key in kwargs:
-            args.append("%s%d" % (key.upper(), kwargs[key]))
+            if kwargs[key] is not None:
+                args.append("%s%d" % (key.upper(), kwargs[key]))
+            else:
+                args.append("%s" % key.upper())
 
-        command = command + " " + ' '.join(args) + "\r\n"
+        command = command + ((' ' + ' '.join(args)) if len(args) else '') + "\r\n"
 
         if self.simulated:
             self.command_queue.append(command)
@@ -206,8 +214,11 @@ class CNCDriver(object):
 
         self.send_command(code, **args)
 
-    def home(self):
-        self.send_command(self.HOME)
+    def home(self, axis=None):
+        if axis is None:
+            self.send_command(self.HOME)
+        else:
+            self.send_command(self.HOME, **{axis: None})
 
     def wait(self, ms):
         self.send_command(self.DWELL, p=ms)
@@ -241,8 +252,8 @@ class CNCDriver(object):
 
 class OpenTrons(CNCDriver):
 
-    DEBUG_ON = 'M62'
-    DEBUG_OFF = 'M63'
+    # DEBUG_ON = 'M62'
+    # DEBUG_OFF = 'M63'
 
     _stat_command = '{"stat":0}'
 
@@ -254,7 +265,7 @@ class OpenTrons(CNCDriver):
         self.move(a=self.pipette.top)
 
     def plunger_to_first_stop(self):
-        self.move(a=self.pipette.max_vol)
+        self.move(a=self.pipette.plunge_depth(self.pipette.max_vol))
 
     def press_plunger_for_volume(self, volume):
         self.move(a=self.pipette.plunge_depth(volume))
@@ -262,9 +273,8 @@ class OpenTrons(CNCDriver):
     def blowout(self):
         self.move(a=self.pipette.blowout)
 
-    def raise_pipette(self):
-        self.move(z=0)
-
+    def drop_tip(self):
+        self.move(a=self.pipette.droptip)
 
 
 class MoveLogger(CNCDriver):
